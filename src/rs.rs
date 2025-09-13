@@ -5,6 +5,7 @@ use std::net::{Ipv6Addr, IpAddr};
 use std::str::FromStr;
 use std::time::Duration;
 
+use anyhow::Result;
 use pnet::packet::Packet;
 use pnet::packet::ip::IpNextHeaderProtocols;
 use pnet::packet::icmpv6::{Icmpv6Types, Icmpv6Code};
@@ -26,7 +27,7 @@ pub fn resolve_router_prefix() -> Result<IpAddr, String> {
     let icmpv6_response = match tr.next_with_timeout(Duration::from_secs(10)) {
         Ok(packet) => match packet {
             Some((res, _)) => res,
-            _ => return Err("Failed: receive ICMPv6 packet.".to_string()),
+            _ => return Err("Failed to receive ICMPv6 packet.".to_string()),
         },
         Err(e) => return Err(e.to_string()),
     };
@@ -34,7 +35,7 @@ pub fn resolve_router_prefix() -> Result<IpAddr, String> {
         return parse_ra(icmpv6_response.packet());
     }
 
-    Err("Failed: receive RA.".to_string())
+    Err("Failed toreceived RA.".to_string())
 }
 
 fn gen_router_solicit<'a>() -> MutableRouterSolicitPacket<'a> {
@@ -52,12 +53,12 @@ fn gen_router_solicit<'a>() -> MutableRouterSolicitPacket<'a> {
 }
 
 fn parse_ra(packet: &[u8]) -> Result<IpAddr, String> {
-    let ra = RouterAdvertPacket::owned(packet.to_vec()).ok_or("Failed: parse RA.")?;
-    let option = ra.get_options().into_iter().find(|opt| opt.option_type == PrefixInformation).ok_or("Failed: parse RA.")?;
+    let ra = RouterAdvertPacket::owned(packet.to_vec()).ok_or("Failed to parse RA.")?;
+    let option = ra.get_options().into_iter().find(|opt| opt.option_type == PrefixInformation).ok_or("Failed to parse RA.")?;
     if option.data.len() >= 30 {
-        let prefix: [u8; 16] = option.data[14..30].try_into().ok().ok_or("Failed: parse Prefix Information.")?;
+        let prefix: [u8; 16] = option.data[14..30].try_into().ok().ok_or("Failed to parse Prefix Information.")?;
         return Ok(IpAddr::V6(Ipv6Addr::from(prefix)));
     }
 
-    Err("Failed: not found Prefix Information.".to_string())
+    Err("Not found IPv6 Prefix Information.".to_string())
 }
