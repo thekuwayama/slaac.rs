@@ -1,1 +1,19 @@
 # router_solicit.rs
+
+[![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/thekuwayama/router_solicit.rs/master/LICENSE.txt)
+
+`router_solicit.rs` is CLI to resolve IPv6 Prefix Information.
+
+## Usage
+
+You can build and run `router_solicit.rs` with the following:
+
+```
+$ git clone git@github.com:thekuwayama/router_solicit.rs.git
+
+$ cd router_solicit.rs
+
+$ cargo build
+
+$ sudo ./target/debug/router_solicit
+```
