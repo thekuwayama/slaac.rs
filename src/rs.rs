@@ -14,18 +14,16 @@ use pnet::packet::icmpv6::ndp::{MutableRouterSolicitPacket, NdpOption, NdpOption
 use pnet::packet::icmpv6::ndp::NdpOptionTypes::PrefixInformation;
 use pnet::transport::{self, TransportChannelType, TransportProtocol};
 
-pub fn resolve_router_prefix() -> Result<IpAddr, String> {
-    let (mut ts, mut tr) = transport::transport_channel(
-        4096,
-        TransportChannelType::Layer4(TransportProtocol::Ipv6(IpNextHeaderProtocols::Icmpv6)),
-    )
-    .map_err(|e| e.to_string())?;
+pub(crate) fn resolve_router_prefix() -> Result<IpAddr, String> {
+    let channel_type = TransportChannelType::Layer4(TransportProtocol::Ipv6(IpNextHeaderProtocols::Icmpv6));
+    let (mut ts, mut tr) = transport::transport_channel(4096, channel_type).map_err(|e| e.to_string())?;
     let mut tr = transport::icmpv6_packet_iter(&mut tr);
     
     let router_solicit = gen_router_solicit()?;
     let dst = IpAddr::from_str("ff02::2").unwrap();
     ts.set_ttl(255).map_err(|e| e.to_string())?;
     ts.send_to(router_solicit, dst).map_err(|e| e.to_string())?;
+
     let icmpv6_response = match tr.next_with_timeout(Duration::from_secs(10)) {
         Ok(packet) => match packet {
             Some((res, _)) => res,
@@ -58,6 +56,7 @@ fn gen_router_solicit<'a>() -> Result<MutableRouterSolicitPacket<'a>, String> {
     rs.set_icmpv6_type(Icmpv6Types::RouterSolicit);
     rs.set_icmpv6_code(Icmpv6Code(0));
     rs.set_options(&options[..]);
+
     Ok(rs)
 }
 
