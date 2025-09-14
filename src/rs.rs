@@ -6,6 +6,7 @@ use std::str::FromStr;
 use std::time::Duration;
 
 use anyhow::Result;
+use pnet::datalink;
 use pnet::packet::Packet;
 use pnet::packet::ip::IpNextHeaderProtocols;
 use pnet::packet::icmpv6::{Icmpv6Types, Icmpv6Code};
@@ -21,8 +22,9 @@ pub fn resolve_router_prefix() -> Result<IpAddr, String> {
     .map_err(|e| e.to_string())?;
     let mut tr = transport::icmpv6_packet_iter(&mut tr);
     
-    let router_solicit = gen_router_solicit();
+    let router_solicit = gen_router_solicit()?;
     let dst = IpAddr::from_str("ff02::2").unwrap();
+    ts.set_ttl(255).map_err(|e| e.to_string())?;
     ts.send_to(router_solicit, dst).map_err(|e| e.to_string())?;
     let icmpv6_response = match tr.next_with_timeout(Duration::from_secs(10)) {
         Ok(packet) => match packet {
@@ -38,18 +40,25 @@ pub fn resolve_router_prefix() -> Result<IpAddr, String> {
     Err("Failed toreceived RA.".to_string())
 }
 
-fn gen_router_solicit<'a>() -> MutableRouterSolicitPacket<'a> {
-    let packet = [0u8; 16];
+fn gen_router_solicit<'a>() -> Result<MutableRouterSolicitPacket<'a>, String> {
+    let packet = vec![0u8; 16];
+    let lladdr = datalink::interfaces().into_iter()
+        .find(|iface| iface.is_up() && iface.name == "en0")
+        .ok_or("Not found en0 network interface.")?
+        .mac
+        .ok_or("Not found en0 mac address.")?
+        .octets()
+        .to_vec();
     let options = [NdpOption {
         option_type: NdpOptionTypes::SourceLLAddr,
         length: 1,
-        data: vec![0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+        data: lladdr,
     }];
-    let mut rs = MutableRouterSolicitPacket::owned(packet.to_vec()).unwrap();
+    let mut rs = MutableRouterSolicitPacket::owned(packet).unwrap();
     rs.set_icmpv6_type(Icmpv6Types::RouterSolicit);
     rs.set_icmpv6_code(Icmpv6Code(0));
     rs.set_options(&options[..]);
-    rs
+    Ok(rs)
 }
 
 fn parse_ra(packet: &[u8]) -> Result<IpAddr, String> {
