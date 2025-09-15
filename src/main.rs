@@ -17,14 +17,14 @@ fn main() {
         iface_id[0], iface_id[1], iface_id[2], iface_id[3],
     );
     if let Err(e) = dad::resolve_iface_id(&target_addr) {
-        println!("{}", e);
+        eprintln!("{}", e);
         return
     }
 
     let prefix = match rs::resolve_router_prefix(lladdr) {
         Ok(prefix) => prefix,
-        Err(msg) => {
-            println!("{}", msg);
+        Err(e) => {
+            eprintln!("{}", e);
             return
         },
     };
@@ -34,6 +34,6 @@ fn main() {
         iface_id[0], iface_id[1], iface_id[2], iface_id[3],
     );
     if let Err(e) = dad::resolve_iface_id(&target_addr) {
-        println!("{}", e);
+        eprintln!("{}", e);
     }
 }

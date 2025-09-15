@@ -23,7 +23,7 @@ pub(crate) fn resolve_router_prefix(lladdr: Vec<u8>) -> Result<Ipv6Addr, String>
     ts.set_ttl(255).map_err(|e| e.to_string())?;
     ts.send_to(rs, dst).map_err(|e| e.to_string())?;
 
-    let icmpv6_response = match tr.next_with_timeout(Duration::from_secs(10)) {
+    let icmpv6_response = match tr.next_with_timeout(Duration::from_secs(2)) {
         Ok(packet) => match packet {
             Some((res, _)) => res,
             _ => return Err("Failed to receive ICMPv6 packet.".to_string()),
