@@ -16,7 +16,7 @@ fn main() {
         0xfe80, 0, 0, 0,
         iface_id[0], iface_id[1], iface_id[2], iface_id[3],
     );
-    eprintln!("link local address: {:?}", target_addr);
+    eprintln!("Link local address: {:?}", target_addr);
 
     eprintln!("DAD start...");
     if let Err(e) = dad::resolve_iface_id(&target_addr) {
@@ -56,4 +56,5 @@ fn main() {
     if let Err(e) = dad::advertise_addr(&target_addr) {
         eprintln!("{}", e);
     }
+    eprintln!("Global address: {:?}", target_addr);
 }

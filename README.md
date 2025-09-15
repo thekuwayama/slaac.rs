@@ -1,21 +1,21 @@
-# router_solicit.rs
+# slaac.rs
 
-[![CI](https://github.com/thekuwayama/router_solicit.rs/workflows/CI/badge.svg)](https://github.com/thekuwayama/router_solicit.rs/actions?workflow=CI)
-[![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/thekuwayama/router_solicit.rs/master/LICENSE.txt)
-[![dependency status](https://deps.rs/repo/github/thekuwayama/router_solicit.rs/status.svg)](https://deps.rs/repo/github/thekuwayama/router_solicit.rs)
+[![CI](https://github.com/thekuwayama/slaac.rs/workflows/CI/badge.svg)](https://github.com/thekuwayama/slaac.rs/actions?workflow=CI)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/thekuwayama/slaac.rs/master/LICENSE.txt)
+[![dependency status](https://deps.rs/repo/github/thekuwayama/slaac.rs/status.svg)](https://deps.rs/repo/github/thekuwayama/slaac.rs)
 
-`router_solicit.rs` is CLI to resolve IPv6 Prefix Information.
+`slaac.rs` is CLI to do the SLAAC.
 
 ## Usage
 
-You can build and run `router_solicit.rs` with the following:
+You can build and run `slaac.rs` with the following:
 
 ```
-$ git clone git@github.com:thekuwayama/router_solicit.rs.git
+$ git clone git@github.com:thekuwayama/slaac.rs.git
 
-$ cd router_solicit.rs
+$ cd slaac.rs
 
 $ cargo build
 
-$ sudo ./target/debug/router_solicit
+$ sudo ./target/debug/slaac
 ```

@@ -1,5 +1,5 @@
 [package]
-name = "router_solicit"
+name = "slaac"
 version = "0.1.0"
 authors = ["thekuwayama <thekuwayama@gmail.com>"]
 edition = "2018"
