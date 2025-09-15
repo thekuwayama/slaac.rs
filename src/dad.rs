@@ -1,6 +1,5 @@
 extern crate pnet;
 
-use std::io::ErrorKind;
 use std::net::Ipv6Addr;
 use std::time::Duration;
 
@@ -23,9 +22,9 @@ pub(crate) fn resolve_iface_id(target_addr: &Ipv6Addr) -> Result<(), String> {
     ts.set_ttl(255).map_err(|e| e.to_string())?;
     ts.send_to(ns, dst.into()).map_err(|e| e.to_string())?;
 
-    match tr.next_with_timeout(Duration::from_secs(10)) {
+    match tr.next_with_timeout(Duration::from_secs(2)) {
+        Ok(res) if res.is_none() => Ok(()),
         Ok(_) => Err(format!("{} has already used.", dst)),
-        Err(e) if e.kind() == ErrorKind::TimedOut => Ok(()),
         Err(e) => Err(e.to_string()),
     }
 }
