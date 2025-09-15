@@ -11,7 +11,7 @@ fn main() {
         .get_one::<String>(cli::IFACE)
         .map_or(vec![0x00, 0x00, 0x00, 0x00, 0x00, 0x00], |iface| ll::get(iface).unwrap_or(vec![0x00, 0x00, 0x00, 0x00, 0x00, 0x00]));
 
-    let iface_id: [u16; 4] = [0, 0, 0, 0x1234];
+    let iface_id: [u16; 4] = [0, 0, 0, 0x1234]; // TODO: randomize iface ID
     let target_addr = Ipv6Addr::new(
         0xfe80, 0, 0, 0,
         iface_id[0], iface_id[1], iface_id[2], iface_id[3],
@@ -42,9 +42,8 @@ fn main() {
     eprintln!("Prefix: {:?}/{}", prefix, prefix_length);
 
     eprintln!("DAD start...");
-    // FIXME: using prefix_length
     let target_addr = Ipv6Addr::new(
-        prefix.segments()[0], prefix.segments()[1], prefix.segments()[2], prefix.segments()[3],
+        prefix.segments()[0], prefix.segments()[1], prefix.segments()[2], prefix.segments()[3], // TODO: using prefix_length
         iface_id[0], iface_id[1], iface_id[2], iface_id[3],
     );
     if let Err(e) = dad::resolve_iface_id(&target_addr) {

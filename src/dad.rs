@@ -26,7 +26,7 @@ pub(crate) fn resolve_iface_id(target_addr: &Ipv6Addr) -> Result<(), String> {
 
     match tr.next_with_timeout(Duration::from_secs(2)) {
         Ok(res) if res.is_none() => Ok(()),
-        Ok(_) => Err(format!("{} has already used.", dst)),
+        Ok(_) => Err(format!("{} has already used.", dst)), // TODO: parse NA
         Err(e) => Err(e.to_string()),
     }
 }
