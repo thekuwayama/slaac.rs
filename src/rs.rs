@@ -19,7 +19,7 @@ pub(crate) fn resolve_router_prefix(lladdr: Vec<u8>) -> Result<(Ipv6Addr, u8), S
     let (mut ts, mut tr) = transport::transport_channel(4096, channel_type).map_err(|e| e.to_string())?;
     let mut tr = transport::icmpv6_packet_iter(&mut tr);
 
-    let rs = gen_router_solicit(lladdr)?;
+    let rs = gen_router_solicit(lladdr);
     let dst = IpAddr::from_str("ff02::2").unwrap();
     ts.set_ttl(255).map_err(|e| e.to_string())?;
     ts.send_to(rs, dst).map_err(|e| e.to_string())?;
@@ -38,7 +38,7 @@ pub(crate) fn resolve_router_prefix(lladdr: Vec<u8>) -> Result<(Ipv6Addr, u8), S
     Err("Failed toreceived RA.".to_string())
 }
 
-fn gen_router_solicit<'a>(lladdr: Vec<u8>) -> Result<MutableRouterSolicitPacket<'a>, String> {
+fn gen_router_solicit<'a>(lladdr: Vec<u8>) -> MutableRouterSolicitPacket<'a> {
     let packet = vec![0u8; 16];
     let options = [NdpOption {
         option_type: NdpOptionTypes::SourceLLAddr,
@@ -50,7 +50,7 @@ fn gen_router_solicit<'a>(lladdr: Vec<u8>) -> Result<MutableRouterSolicitPacket<
     rs.set_icmpv6_code(Icmpv6Code(0));
     rs.set_options(&options[..]);
 
-    Ok(rs)
+    rs
 }
 
 fn parse_ra(packet: &[u8]) -> Result<(Ipv6Addr, u8), String> {
@@ -63,4 +63,22 @@ fn parse_ra(packet: &[u8]) -> Result<(Ipv6Addr, u8), String> {
     }
 
     Err("Not found IPv6 Prefix Information.".to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_gen_router_solicit() {
+        assert_eq!(
+            gen_router_solicit(vec![0, 0, 0, 0, 0, 0]).packet(),
+            &vec![
+                0x85, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00,
+                0x01, 0x01, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00,
+            ],
+        );
+    }
 }
