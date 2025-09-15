@@ -55,10 +55,10 @@ pub(crate) fn advertise_addr(target_addr: &Ipv6Addr) -> Result<(), String> {
 
 fn gen_neighbor_advert<'a>(ip_addr: &Ipv6Addr) -> Result<MutableNeighborAdvertPacket<'a>, String> {
     let packet = vec![0u8; 24];
-    let mut ns = MutableNeighborAdvertPacket::owned(packet).unwrap();
-    ns.set_icmpv6_type(Icmpv6Types::NeighborAdvert);
-    ns.set_icmpv6_code(Icmpv6Code(0));
-    ns.set_target_addr(*ip_addr);
+    let mut na = MutableNeighborAdvertPacket::owned(packet).unwrap();
+    na.set_icmpv6_type(Icmpv6Types::NeighborAdvert);
+    na.set_icmpv6_code(Icmpv6Code(0));
+    na.set_target_addr(*ip_addr);
 
-    Ok(ns)
+    Ok(na)
 }
