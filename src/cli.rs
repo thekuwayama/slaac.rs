@@ -1,3 +1,5 @@
+extern crate clap;
+
 use clap::{crate_description, crate_name, crate_version, Command, arg};
 
 pub(crate) const IFACE: &str = "IFACE";

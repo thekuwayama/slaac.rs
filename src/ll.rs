@@ -1,3 +1,6 @@
+extern crate anyhow;
+extern crate pnet;
+
 use anyhow::Result;
 use pnet::datalink;
 
