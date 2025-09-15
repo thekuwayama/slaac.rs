@@ -8,4 +8,5 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1"
+clap = { version = "4.3", features = ["cargo"] }
 pnet = "0.35"
