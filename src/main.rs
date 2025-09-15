@@ -1,7 +1,7 @@
-mod rs;
 mod cli;
 mod dad;
 mod ll;
+mod rs;
 
 use std::net::Ipv6Addr;
 
@@ -9,7 +9,10 @@ fn main() {
     let matches = cli::build().get_matches();
     let lladdr = matches
         .get_one::<String>(cli::IFACE)
-        .map_or(vec![0x00, 0x00, 0x00, 0x00, 0x00, 0x00], |iface| ll::get(iface).unwrap_or(vec![0x00, 0x00, 0x00, 0x00, 0x00, 0x00]));
+        .map_or(
+            vec![0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+            |iface| ll::get(iface).unwrap_or(vec![0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+        );
 
     let iface_id: [u16; 4] = [0, 0, 0, 0x1234]; // TODO: randomize iface ID
     let target_addr = Ipv6Addr::new(
