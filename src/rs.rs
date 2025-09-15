@@ -14,7 +14,7 @@ use pnet::packet::icmpv6::ndp::{MutableRouterSolicitPacket, NdpOption, NdpOption
 use pnet::packet::icmpv6::ndp::NdpOptionTypes::PrefixInformation;
 use pnet::transport::{self, TransportChannelType, TransportProtocol};
 
-pub(crate) fn resolve_router_prefix(lladdr: Vec<u8>) -> Result<Ipv6Addr, String> {
+pub(crate) fn resolve_router_prefix(lladdr: Vec<u8>) -> Result<(Ipv6Addr, u8), String> {
     let channel_type = TransportChannelType::Layer4(TransportProtocol::Ipv6(IpNextHeaderProtocols::Icmpv6));
     let (mut ts, mut tr) = transport::transport_channel(4096, channel_type).map_err(|e| e.to_string())?;
     let mut tr = transport::icmpv6_packet_iter(&mut tr);
@@ -53,12 +53,13 @@ fn gen_router_solicit<'a>(lladdr: Vec<u8>) -> Result<MutableRouterSolicitPacket<
     Ok(rs)
 }
 
-fn parse_ra(packet: &[u8]) -> Result<Ipv6Addr, String> {
+fn parse_ra(packet: &[u8]) -> Result<(Ipv6Addr, u8), String> {
     let ra = RouterAdvertPacket::owned(packet.to_vec()).ok_or("Failed to parse RA.")?;
     let option = ra.get_options().into_iter().find(|opt| opt.option_type == PrefixInformation).ok_or("Failed to parse RA.")?;
-    if option.data.len() >= 30 {
-        let prefix: [u8; 16] = option.data[14..30].try_into().ok().ok_or("Failed to parse Prefix Information.")?;
-        return Ok(Ipv6Addr::from(prefix));
+    if option.data.len() >= 32 {
+        let prefix: [u8; 16] = option.data[16..32].try_into().ok().ok_or("Failed to parse Prefix Information.")?;
+        let prefix_length = option.data[2];
+        return Ok((Ipv6Addr::from(prefix), prefix_length));
     }
 
     Err("Not found IPv6 Prefix Information.".to_string())

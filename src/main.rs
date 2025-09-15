@@ -32,16 +32,17 @@ fn main() {
     }
 
     eprintln!("Resolve prefix...");
-    let prefix = match rs::resolve_router_prefix(lladdr) {
-        Ok(prefix) => prefix,
+    let (prefix, prefix_length) = match rs::resolve_router_prefix(lladdr) {
+        Ok((prefix, prefix_length)) => (prefix, prefix_length),
         Err(e) => {
             eprintln!("{}", e);
             return
         },
     };
-    eprintln!("Prefix: {:?}", prefix);
+    eprintln!("Prefix: {:?}/{}", prefix, prefix_length);
 
     eprintln!("DAD start...");
+    // FIXME: using prefix_length
     let target_addr = Ipv6Addr::new(
         prefix.segments()[0], prefix.segments()[1], prefix.segments()[2], prefix.segments()[3],
         iface_id[0], iface_id[1], iface_id[2], iface_id[3],
