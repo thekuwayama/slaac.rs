@@ -52,7 +52,7 @@ fn main() {
     }
     eprintln!("No duplicates");
 
-    eprintln!("Advertise link local address: {:?}", target_addr);
+    eprintln!("Advertise global address: {:?}", target_addr);
     if let Err(e) = dad::advertise_addr(&target_addr) {
         eprintln!("{}", e);
     }
