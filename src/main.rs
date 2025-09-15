@@ -16,11 +16,22 @@ fn main() {
         0xfe80, 0, 0, 0,
         iface_id[0], iface_id[1], iface_id[2], iface_id[3],
     );
+    eprintln!("link local address: {:?}", target_addr);
+
+    eprintln!("DAD start...");
     if let Err(e) = dad::resolve_iface_id(&target_addr) {
         eprintln!("{}", e);
         return
     }
+    eprintln!("No duplicates");
 
+    eprintln!("Advertise link local address: {:?}", target_addr);
+    if let Err(e) = dad::advertise_addr(&target_addr) {
+        eprintln!("{}", e);
+        return
+    }
+
+    eprintln!("Resolve prefix...");
     let prefix = match rs::resolve_router_prefix(lladdr) {
         Ok(prefix) => prefix,
         Err(e) => {
@@ -28,12 +39,21 @@ fn main() {
             return
         },
     };
+    eprintln!("Prefix: {:?}", prefix);
 
+    eprintln!("DAD start...");
     let target_addr = Ipv6Addr::new(
         prefix.segments()[4], prefix.segments()[5], prefix.segments()[6], prefix.segments()[7],
         iface_id[0], iface_id[1], iface_id[2], iface_id[3],
     );
     if let Err(e) = dad::resolve_iface_id(&target_addr) {
+        eprintln!("{}", e);
+        return
+    }
+    eprintln!("No duplicates");
+
+    eprintln!("Advertise link local address: {:?}", target_addr);
+    if let Err(e) = dad::advertise_addr(&target_addr) {
         eprintln!("{}", e);
     }
 }

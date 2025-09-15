@@ -1,12 +1,13 @@
 extern crate pnet;
 
-use std::net::Ipv6Addr;
+use std::net::{IpAddr, Ipv6Addr};
+use std::str::FromStr;
 use std::time::Duration;
 
 use anyhow::Result;
 use pnet::packet::ip::IpNextHeaderProtocols;
 use pnet::packet::icmpv6::{Icmpv6Types, Icmpv6Code};
-use pnet::packet::icmpv6::ndp::MutableNeighborSolicitPacket;
+use pnet::packet::icmpv6::ndp::{MutableNeighborSolicitPacket, MutableNeighborAdvertPacket};
 use pnet::transport::{self, TransportChannelType, TransportProtocol};
 
 pub(crate) fn resolve_iface_id(target_addr: &Ipv6Addr) -> Result<(), String> {
@@ -33,6 +34,28 @@ fn gen_neighbor_solicit<'a>(ip_addr: &Ipv6Addr) -> Result<MutableNeighborSolicit
     let packet = vec![0u8; 24];
     let mut ns = MutableNeighborSolicitPacket::owned(packet).unwrap();
     ns.set_icmpv6_type(Icmpv6Types::NeighborSolicit);
+    ns.set_icmpv6_code(Icmpv6Code(0));
+    ns.set_target_addr(*ip_addr);
+
+    Ok(ns)
+}
+
+pub(crate) fn advertise_addr(target_addr: &Ipv6Addr) -> Result<(), String> {
+    let channel_type = TransportChannelType::Layer4(TransportProtocol::Ipv6(IpNextHeaderProtocols::Icmpv6));
+    let (mut ts, _) = transport::transport_channel(4096, channel_type).map_err(|e| e.to_string())?;
+
+    let na = gen_neighbor_advert(target_addr)?;
+    let dst = IpAddr::from_str("ff02::1").unwrap();
+    ts.set_ttl(255).map_err(|e| e.to_string())?;
+    ts.send_to(na, dst).map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+fn gen_neighbor_advert<'a>(ip_addr: &Ipv6Addr) -> Result<MutableNeighborAdvertPacket<'a>, String> {
+    let packet = vec![0u8; 24];
+    let mut ns = MutableNeighborAdvertPacket::owned(packet).unwrap();
+    ns.set_icmpv6_type(Icmpv6Types::NeighborAdvert);
     ns.set_icmpv6_code(Icmpv6Code(0));
     ns.set_target_addr(*ip_addr);
 
