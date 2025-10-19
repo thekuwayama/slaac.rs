@@ -22,20 +22,20 @@ fn main() {
     eprintln!("Link local address: {:?}", target_addr);
 
     eprintln!("DAD start...");
-    if let Err(e) = dad::resolve_iface_id(&target_addr) {
+    if let Err(e) = dad::resolve_iface_id(&target_addr, &lladdr) {
         eprintln!("{}", e);
         return
     }
     eprintln!("No duplicates");
 
     eprintln!("Advertise link local address: {:?}", target_addr);
-    if let Err(e) = dad::advertise_addr(&target_addr) {
+    if let Err(e) = dad::advertise_addr(&target_addr, &lladdr) {
         eprintln!("{}", e);
         return
     }
 
     eprintln!("Resolve prefix...");
-    let (prefix, prefix_length) = match rs::resolve_router_prefix(lladdr) {
+    let (prefix, prefix_length) = match rs::resolve_router_prefix(&lladdr) {
         Ok((prefix, prefix_length)) => (prefix, prefix_length),
         Err(e) => {
             eprintln!("{}", e);
@@ -49,14 +49,14 @@ fn main() {
         prefix.segments()[0], prefix.segments()[1], prefix.segments()[2], prefix.segments()[3], // TODO: using prefix_length
         iface_id[0], iface_id[1], iface_id[2], iface_id[3],
     );
-    if let Err(e) = dad::resolve_iface_id(&target_addr) {
+    if let Err(e) = dad::resolve_iface_id(&target_addr, &lladdr) {
         eprintln!("{}", e);
         return
     }
     eprintln!("No duplicates");
 
     eprintln!("Advertise global address: {:?}", target_addr);
-    if let Err(e) = dad::advertise_addr(&target_addr) {
+    if let Err(e) = dad::advertise_addr(&target_addr, &lladdr) {
         eprintln!("{}", e);
     }
     eprintln!("Global address: {:?}", target_addr);
